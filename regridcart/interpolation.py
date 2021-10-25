@@ -16,6 +16,7 @@ import xarray as xr
 from xesmf.backend import esmf_regrid_build, esmf_regrid_finalize
 
 from .domain import LocalCartesianDomain
+from . import coords
 
 
 class SilentRegridder(xesmf.Regridder):
@@ -30,19 +31,6 @@ class SilentRegridder(xesmf.Regridder):
             self._grid_in, self._grid_out, self.method, filename=self.filename
         )
         esmf_regrid_finalize(regrid)  # only need weights, not regrid object
-
-
-def _on_latlon_grid(da):
-    if "lat" in da.coords or "lon" in da.coords:
-        return True
-    elif "lat" in da.data_vars or "lon" in da.data_vars:
-        return True
-
-    pass
-
-
-def _on_cartesian_grid(da):
-    pass
 
 
 def _save_weights():
@@ -60,6 +48,7 @@ def _save_weights():
 
     Path(regridder_tmpdir).mkdir(exist_ok=True, parents=True)
     regridder_weights_fn = str(regridder_tmpdir / regridder_weights_fn)
+
 
 
 def resample(
@@ -81,7 +70,7 @@ def resample(
     """
     using_crs = False
 
-    if "lat" in da.coords and "lon" in da.coords:
+    if coords.has_latlon_coords(da):
         coords = {}
         coords["lat"] = da.coords["lat"]
         coords["lon"] = da.coords["lon"]

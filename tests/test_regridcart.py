@@ -45,3 +45,35 @@ def test_latlon_aligned_data():
 
     dx = 50.0e3  # [m]
     da_phi_resampled = rc.resample(target_domain, da=da_phi_cropped, dx=dx)
+
+
+def test_latlon_aux_coord_data():
+    """
+    Test cropping and resample where the data isn't given on a grid which is
+    lat/lon aligned, but rather the latitudes and longitudes are given with
+    auxilliary variables
+    """
+    target_domain = rc.LocalCartesianDomain(
+        central_latitude=14.0,
+        central_longitude=-48,
+        l_meridional=1000.0e3,
+        l_zonal=3000.0e3,
+    )
+
+    # generate some sample data on a regular lat/lon grid
+    ds = xr.Dataset(coords=dict(x=np.arange(-20.0, 20.0, 0.5), y=np.arange(-10.0, 10.0, 0.5)))
+
+    # the lat/lon coords will be simply given as rotations here
+    theta = 20.0 * 3.14 / 180.0
+    ds.coords["lon"] = np.cos(theta) * ds.x - np.sin(theta) * ds.y - 48.0
+    ds.coords["lat"] = np.sin(theta) * ds.x + np.cos(theta) * ds.y + 14.0
+
+    ds["phi"] = np.cos(ds.x / 4.0) * np.sin(ds.y)
+
+    da_phi = ds.phi
+    da_phi_cropped = rc.crop_field_to_domain(
+        domain=target_domain, da=da_phi, pad_pct=0.0
+    )
+
+    dx = 50.0e3  # [m]
+    da_phi_resampled = rc.resample(target_domain, da=da_phi_cropped, dx=dx)

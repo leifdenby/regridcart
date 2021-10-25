@@ -2,6 +2,7 @@ import numpy as np
 import cartopy.crs as ccrs
 
 from .crs import parse_cf as parse_cf_crs
+from . import coords
 
 
 def crop_field_to_bbox(da, x_range, y_range, pad_pct=0.1, x_dim="x", y_dim="y"):
@@ -32,7 +33,12 @@ def crop_field_to_bbox(da, x_range, y_range, pad_pct=0.1, x_dim="x", y_dim="y"):
     else:
         y_slice = slice(y_min, y_max)
 
-    return da.sel({x_dim: x_slice, y_dim: y_slice})
+    da_cropped = da.sel({x_dim: x_slice, y_dim: y_slice})
+
+    if da_cropped[x_dim].count() == 0 or da_cropped[y_dim].count() == 0:
+        raise DomainBoundsOutsideOfInputException
+
+    return da_cropped
 
 
 class DomainBoundsOutsideOfInputException(Exception):
@@ -54,24 +60,77 @@ def _latlon_box_to_integer_values(bbox):
     return bbox_truncated
 
 
+def _crop_with_latlon_aligned_crid(domain, da, pad_pct):
+    x_dim, y_dim = "lon", "lat"
+    latlon_box = _latlon_box_to_integer_values(domain.latlon_bounds)
+    xs = latlon_box[..., 0]
+    ys = latlon_box[..., 1]
+    x_min, x_max = np.min(xs), np.max(xs)
+    y_min, y_max = np.min(ys), np.max(ys)
+    if da[x_dim][-1] > 180.0:
+        if x_max < 0.0:
+            x_min += 360.0
+            x_max += 360.0
+        else:
+            raise NotImplementedError
+    x_range = [x_min, x_max]
+    y_range = [y_min, y_max]
+
+    return crop_field_to_bbox(
+        da=da,
+        x_range=x_range,
+        y_range=y_range,
+        pad_pct=pad_pct,
+        x_dim=x_dim,
+        y_dim=y_dim,
+    )
+
+
+def _crop_with_latlon_aux_grid(domain, da, pad_pct):
+    assert da.lat.dims == da.lon.dims
+    assert len(da.lat.dims) == 2
+    x_dim, y_dim = da.lat.dims
+
+    latlon_box = _latlon_box_to_integer_values(domain.latlon_bounds)
+    bbox_lons = latlon_box[..., 0]
+    bbox_lats = latlon_box[..., 1]
+
+    mask = (
+        (bbox_lons.min() < da.lon)
+        * (bbox_lons.max() > da.lon)
+        * (bbox_lats.min() < da.lat)
+        * (bbox_lats.max() > da.lat)
+    )
+
+    da_masked = da.where(mask, drop=True)
+
+    x_min = da_masked[x_dim].min()
+    x_max = da_masked[x_dim].max()
+    y_min = da_masked[y_dim].min()
+    y_max = da_masked[y_dim].max()
+
+    x_range = (x_min, x_max)
+    y_range = (y_min, y_max)
+
+    return crop_field_to_bbox(
+        da=da,
+        x_range=x_range,
+        y_range=y_range,
+        pad_pct=pad_pct,
+        x_dim=x_dim,
+        y_dim=y_dim,
+    )
+
+
 def crop_field_to_domain(domain, da, pad_pct=0.1):
     if _has_spatial_coord(da=da, c="x") and _has_spatial_coord(da=da, c="y"):
         raise NotImplementedError
-    elif "lat" in da.coords and "lon" in da.coords:
-        x_dim, y_dim = "lon", "lat"
-        latlon_box = _latlon_box_to_integer_values(domain.latlon_bounds)
-        xs = latlon_box[..., 0]
-        ys = latlon_box[..., 1]
-        x_min, x_max = np.min(xs), np.max(xs)
-        y_min, y_max = np.min(ys), np.max(ys)
-        if da[x_dim][-1] > 180.0:
-            if x_max < 0.0:
-                x_min += 360.0
-                x_max += 360.0
-            else:
-                raise NotImplementedError
-        x_range = [x_min, x_max]
-        y_range = [y_min, y_max]
+    if coords.on_latlon_aligned_grid(da):
+        da_cropped = _crop_with_latlon_aligned_crid(
+            domain=domain, da=da, pad_pct=pad_pct
+        )
+    elif coords.has_latlon_coords(da):
+        da_cropped = _crop_with_latlon_aux_grid(domain=domain, da=da, pad_pct=pad_pct)
     elif "grid_mapping" in da.attrs:
         x_dim, y_dim = "x", "y"
         crs = parse_cf_crs(da)
@@ -85,17 +144,5 @@ def crop_field_to_domain(domain, da, pad_pct=0.1):
         y_range = [y_min, y_max]
     else:
         raise NotImplementedError(da)
-
-    da_cropped = crop_field_to_bbox(
-        da=da,
-        x_range=x_range,
-        y_range=y_range,
-        pad_pct=pad_pct,
-        x_dim=x_dim,
-        y_dim=y_dim,
-    )
-
-    if da_cropped[x_dim].count() == 0 or da_cropped[y_dim].count() == 0:
-        raise DomainBoundsOutsideOfInputException
 
     return da_cropped
