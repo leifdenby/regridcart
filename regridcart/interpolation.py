@@ -50,7 +50,6 @@ def _save_weights():
     regridder_weights_fn = str(regridder_tmpdir / regridder_weights_fn)
 
 
-
 def resample(
     domain,
     da,

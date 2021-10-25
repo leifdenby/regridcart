@@ -61,7 +61,9 @@ def test_latlon_aux_coord_data():
     )
 
     # generate some sample data on a regular lat/lon grid
-    ds = xr.Dataset(coords=dict(x=np.arange(-20.0, 20.0, 0.5), y=np.arange(-10.0, 10.0, 0.5)))
+    ds = xr.Dataset(
+        coords=dict(x=np.arange(-20.0, 20.0, 0.5), y=np.arange(-10.0, 10.0, 0.5))
+    )
 
     # the lat/lon coords will be simply given as rotations here
     theta = 20.0 * 3.14 / 180.0
