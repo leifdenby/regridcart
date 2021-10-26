@@ -44,9 +44,7 @@ def _save_weights(da, new_grid, regridder_tmpdir, method):
 def resample(da, old_grid, new_grid, method, keep_attrs):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        regridder = SilentRegridder(
-            # filename=regridder_weights_fn,
-            # reuse_weights=True,
+        regridder = xesmf.Regridder(
             ds_in=old_grid,
             ds_out=new_grid,
             method=method,
