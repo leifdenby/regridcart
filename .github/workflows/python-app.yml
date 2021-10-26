@@ -49,7 +49,7 @@ jobs:
       run: conda install -y cartopy xesmf xarray rioxarray -c conda-forge
     - name: Test package with pytest
       run: |
-        pip install pytest
+        pip install pytest worldview_dl
         python -m pytest
     - name: Test notebooks
       run: |
