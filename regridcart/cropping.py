@@ -2,7 +2,12 @@ import numpy as np
 import cartopy.crs as ccrs
 
 from .crs import parse_cf as parse_cf_crs
-from . import coords
+from .coords import (
+    has_latlon_coords,
+    on_latlon_aligned_grid,
+    get_latlon_coords_using_crs,
+    NoProjectionInformationFound,
+)
 
 
 def crop_field_to_bbox(da, x_range, y_range, pad_pct=0.1, x_dim="x", y_dim="y"):
@@ -86,20 +91,20 @@ def _crop_with_latlon_aligned_crid(domain, da, pad_pct):
     )
 
 
-def _crop_with_latlon_aux_grid(domain, da, pad_pct):
-    assert da.lat.dims == da.lon.dims
-    assert len(da.lat.dims) == 2
-    x_dim, y_dim = da.lat.dims
+def _crop_with_latlon_aux_grid(domain, da, da_lat, da_lon, pad_pct):
+    assert da_lat.dims == da_lon.dims
+    assert len(da_lat.dims) == 2
+    y_dim, x_dim = da_lat.dims
 
     latlon_box = _latlon_box_to_integer_values(domain.latlon_bounds)
     bbox_lons = latlon_box[..., 0]
     bbox_lats = latlon_box[..., 1]
 
     mask = (
-        (bbox_lons.min() < da.lon)
-        * (bbox_lons.max() > da.lon)
-        * (bbox_lats.min() < da.lat)
-        * (bbox_lats.max() > da.lat)
+        (bbox_lons.min() < da_lon)
+        * (bbox_lons.max() > da_lon)
+        * (bbox_lats.min() < da_lat)
+        * (bbox_lats.max() > da_lat)
     )
 
     da_masked = da.where(mask, drop=True)
@@ -123,25 +128,55 @@ def _crop_with_latlon_aux_grid(domain, da, pad_pct):
 
 
 def crop_field_to_domain(domain, da, pad_pct=0.1):
-    if _has_spatial_coord(da=da, c="x") and _has_spatial_coord(da=da, c="y"):
-        raise NotImplementedError
-    if coords.on_latlon_aligned_grid(da):
+    """
+    Crop a data-array to a domain. The data-array is expected to have
+    coordinates defined using one of the following:
+
+    1. `lat` and `lon` coordinates along which the data is aligned, i.e. `lat`
+       and `lon` are given as 1D arrays
+    2. `lat` and `lon` are given as auxilliary variables so that the data isn't
+       aligned along the lat/lon directions, but rather the `lat` and `lon` of
+       every datapoint is given
+    3. the data-array has projection information defined in a CF-compliant
+       manner using the `grid_mapping` attribute
+       (http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/build/ch05s06.html)
+    4. the data-array was loaded from a raster-file using
+       `rioxarray.open_rasterio` so that the projection information is
+       available via `da.rio.crs`
+
+    """
+    da_cropped = None
+
+    # first we see if the provided xr.DataArray has `lat` and `lon` coordinates
+    # given with data-array defined along these coordinates
+    if on_latlon_aligned_grid(da):
         da_cropped = _crop_with_latlon_aligned_crid(
             domain=domain, da=da, pad_pct=pad_pct
         )
-    elif coords.has_latlon_coords(da):
-        da_cropped = _crop_with_latlon_aux_grid(domain=domain, da=da, pad_pct=pad_pct)
-    elif "grid_mapping" in da.attrs:
-        crs = parse_cf_crs(da)
-        # the source data is stored in its own projection and so we want to
-        # crop using the coordinates of this projection
-        latlon_box = _latlon_box_to_integer_values(domain.latlon_bounds)
-        xs, ys, _ = crs.transform_points(ccrs.PlateCarree(), *latlon_box.T).T
-        x_min, x_max = np.min(xs), np.max(xs)
-        y_min, y_max = np.min(ys), np.max(ys)
-        x_range = [x_min, x_max]
-        y_range = [y_min, y_max]
-    else:
-        raise NotImplementedError(da)
+    # second option is that `lat` and `lon` are given as auxilliary variables
+    # (or coordinates), but that the data isn't actually defined along the lat
+    # and lon directions (i.e. `lat` and `lon` are 2D arrays in the data-array)
+    elif has_latlon_coords(da):
+        da_cropped = _crop_with_latlon_aux_grid(
+            domain=domain, da=da, pad_pct=pad_pct, da_lat=da.lat, da_lon=da.lon
+        )
+
+    # third we try extracting projection information from the data-array and
+    # getting the lat/lon coordinates that way
+    if da_cropped is None:
+        try:
+            coords = get_latlon_coords_using_crs(da)
+            da_cropped = _crop_with_latlon_aux_grid(
+                domain=domain,
+                da=da,
+                pad_pct=pad_pct,
+                da_lat=coords["lat"],
+                da_lon=coords["lon"],
+            )
+        except NoProjectionInformationFound:
+            pass
+
+    if da_cropped is None:
+        raise NotImplementedError(da.coords)
 
     return da_cropped

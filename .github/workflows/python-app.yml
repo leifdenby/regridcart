@@ -46,10 +46,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
           conda-channels: anaconda, conda-forge
     - name: Install dependencies (conda)
-      run: conda install -y cartopy xesmf xarray mpi -c conda-forge
+      run: conda install -y cartopy xesmf xarray rioxarray -c conda-forge
     - name: Test package with pytest
       run: |
-        pip install pytest
+        pip install pytest worldview_dl
         python -m pytest
     - name: Test notebooks
       run: |

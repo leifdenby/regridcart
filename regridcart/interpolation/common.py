@@ -23,7 +23,22 @@ def resample(
     backend="xesmf",
 ):
     """
-    Resample a xarray DataArray onto this tile with grid made of NxN points
+    Resample a data-array onto a domain at specific resolution `dx` (given in
+    meters). The data-array is expected to have coordinates defined using one
+    of the following:
+
+    1. `lat` and `lon` coordinates along which the data is aligned, i.e. `lat`
+       and `lon` are given as 1D arrays
+    2. `lat` and `lon` are given as auxilliary variables so that the data isn't
+       aligned along the lat/lon directions, but rather the `lat` and `lon` of
+       every datapoint is given
+    3. the data-array has projection information defined in a CF-compliant
+       manner using the `grid_mapping` attribute
+       (http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/build/ch05s06.html)
+    4. the data-array was loaded from a raster-file using
+       `rioxarray.open_rasterio` so that the projection information is
+       available via `da.rio.crs`
+
     """
 
     old_grid = None
