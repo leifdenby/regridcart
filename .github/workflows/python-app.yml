@@ -51,7 +51,7 @@ jobs:
       run: |
         pip install pytest
         python -m pytest
-    - name: Test notebookt
+    - name: Test notebooks
       run: |
-        pip install nbval
+        pip install nbval nb-black
         python -m pytest --nbval-lax --current-env
