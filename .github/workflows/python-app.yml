@@ -46,7 +46,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           conda-channels: anaconda, conda-forge
     - name: Install dependencies (conda)
-      run: conda install -y cartopy xemsf xarray
+      run: conda install -y cartopy xesmf xarray
     - name: Test with pytest
       run: |
         pip install pytest nbformat nbconvert
