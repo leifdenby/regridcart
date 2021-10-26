@@ -47,7 +47,11 @@ jobs:
           conda-channels: anaconda, conda-forge
     - name: Install dependencies (conda)
       run: conda install -y cartopy xesmf xarray
-    - name: Test with pytest
+    - name: Test package with pytest
       run: |
-        pip install pytest nbformat nbconvert
+        pip install pytest
         python -m pytest
+    - name: Test notebookt
+      run: |
+        pip install nbval
+        python -m pytest --nbval-lax
