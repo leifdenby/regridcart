@@ -33,6 +33,7 @@ def _find_xy_coords(da):
     Using CF-conventions for grid projectino information look for the name of
     the x- and y-coordinates in the DataArray
     """
+
     def find_coord(standard_name):
         for c in da.coords:
             if da[c].attrs.get("standard_name") == standard_name:

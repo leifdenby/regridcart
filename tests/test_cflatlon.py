@@ -30,9 +30,7 @@ def test_crop_and_resample_from_cf_coords():
 
     da = rxr.open_rasterio(fn_image)
 
-    da_cropped = rc.crop_field_to_domain(
-        domain=target_domain, da=da, pad_pct=0.0
-    )
+    da_cropped = rc.crop_field_to_domain(domain=target_domain, da=da, pad_pct=0.0)
 
     dx = 10.0e3  # [m]
     da_resampled = rc.resample(target_domain, da=da_cropped, dx=dx)
