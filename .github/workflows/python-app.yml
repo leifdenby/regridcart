@@ -54,4 +54,4 @@ jobs:
     - name: Test notebookt
       run: |
         pip install nbval
-        python -m pytest --nbval-lax
+        python -m pytest --nbval-lax --current-env
