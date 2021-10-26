@@ -25,7 +25,7 @@ class SilentRegridder(xesmf.Regridder):
         esmf_regrid_finalize(regrid)  # only need weights, not regrid object
 
 
-def _save_weights(da, new_grid, regridder_tmpdir):
+def _save_weights(da, new_grid, regridder_tmpdir, method):
     Nx_in, Ny_in = da.x.shape[0], da.y.shape[0]
     Nx_out, Ny_out = int(new_grid.x.count()), int(new_grid.y.count())
 

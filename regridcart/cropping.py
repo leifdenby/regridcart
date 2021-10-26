@@ -132,7 +132,6 @@ def crop_field_to_domain(domain, da, pad_pct=0.1):
     elif coords.has_latlon_coords(da):
         da_cropped = _crop_with_latlon_aux_grid(domain=domain, da=da, pad_pct=pad_pct)
     elif "grid_mapping" in da.attrs:
-        x_dim, y_dim = "x", "y"
         crs = parse_cf_crs(da)
         # the source data is stored in its own projection and so we want to
         # crop using the coordinates of this projection
