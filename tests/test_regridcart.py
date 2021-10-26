@@ -16,12 +16,6 @@ def test_latlon_aligned_data():
     """
     # TODO: add test to ensure the resampling values are correct instead of
     # just ensuring that no exceptions are raised
-    target_domain = rc.LocalCartesianDomain(
-        central_latitude=14.0,
-        central_longitude=-48,
-        l_meridional=1000.0e3,
-        l_zonal=3000.0e3,
-    )
 
     dlat, dlon = 0.1, 0.1
     lat_span = [5.0, 20.0]
@@ -29,6 +23,13 @@ def test_latlon_aligned_data():
 
     lat0 = 0.5 * (lat_span[0] + lat_span[1])
     lon0 = 0.5 * (lon_span[0] + lon_span[1])
+
+    target_domain = rc.LocalCartesianDomain(
+        central_latitude=lat0,
+        central_longitude=lon0,
+        l_meridional=1000.0e3,
+        l_zonal=3000.0e3,
+    )
 
     lats = np.arange(*lat_span, dlat)
     lons = np.arange(*lon_span, dlon)
@@ -45,6 +46,7 @@ def test_latlon_aligned_data():
 
     dx = 50.0e3  # [m]
     da_phi_resampled = rc.resample(target_domain, da=da_phi_cropped, dx=dx)
+    assert da_phi_resampled is not None
 
 
 def test_latlon_aux_coord_data():
@@ -61,7 +63,9 @@ def test_latlon_aux_coord_data():
     )
 
     # generate some sample data on a regular lat/lon grid
-    ds = xr.Dataset(coords=dict(x=np.arange(-20.0, 20.0, 0.5), y=np.arange(-10.0, 10.0, 0.5)))
+    ds = xr.Dataset(
+        coords=dict(x=np.arange(-20.0, 20.0, 0.5), y=np.arange(-10.0, 10.0, 0.5))
+    )
 
     # the lat/lon coords will be simply given as rotations here
     theta = 20.0 * 3.14 / 180.0
@@ -77,3 +81,4 @@ def test_latlon_aux_coord_data():
 
     dx = 50.0e3  # [m]
     da_phi_resampled = rc.resample(target_domain, da=da_phi_cropped, dx=dx)
+    assert da_phi_resampled is not None

@@ -7,6 +7,10 @@ from .mapping import CFProjection
 log = logging.getLogger()
 
 
+class NoProjectionInformationFound(Exception):
+    pass
+
+
 def parse_cf(ds_or_da, varname=None):
     """Parse dataset or dataarray for coordinate system metadata according to CF conventions.
 
@@ -72,6 +76,8 @@ def parse_cf(ds_or_da, varname=None):
         crs = CFProjection(proj_var.attrs)
 
     if crs is None:
-        raise Exception("Didn't find any valid projection information")
+        raise NoProjectionInformationFound(
+            "Didn't find any valid projection information"
+        )
 
     return crs.to_cartopy()
