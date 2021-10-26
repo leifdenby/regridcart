@@ -46,7 +46,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           conda-channels: anaconda, conda-forge
     - name: Install dependencies (conda)
-      run: conda install -y cartopy xesmf xarray
+      run: conda install -y cartopy xesmf xarray -c conda-forge
     - name: Test package with pytest
       run: |
         pip install pytest
