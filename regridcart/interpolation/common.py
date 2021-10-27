@@ -6,6 +6,7 @@ from ..coords import (
     has_latlon_coords,
 )
 from .backends.common import resample as resample_common
+from ..cropping import crop_field_to_domain
 
 
 def _cartesian_resample(domain, da, dx):
@@ -21,6 +22,7 @@ def resample(
     method="bilinear",
     keep_attrs=False,
     backend="xesmf",
+    apply_crop=True,
 ):
     """
     Resample a data-array onto a domain at specific resolution `dx` (given in
@@ -38,6 +40,9 @@ def resample(
     4. the data-array was loaded from a raster-file using
        `rioxarray.open_rasterio` so that the projection information is
        available via `da.rio.crs`
+
+    By default the input array will be cropped before resampling
+    (`apply_crop=True`)
 
     """
 
@@ -59,6 +64,9 @@ def resample(
 
     if old_grid is None:
         raise NotImplementedError(da.coords)
+
+    if apply_crop:
+        da = crop_field_to_domain(domain=domain, da=da)
 
     da_resampled = resample_common(
         da=da,
