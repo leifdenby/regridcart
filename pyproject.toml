@@ -1,17 +1,3 @@
-[tool.poetry]
-name = "regridcart"
-version = "0.1.0"
-description = ""
-authors = ["Leif Denby <leif@denby.eu>"]
-
-[tool.poetry.dependencies]
-python = "^3.9"
-
-[tool.poetry.dev-dependencies]
-pytest = "^5.2"
-notebook = "^6.4.5"
-pylint = "^2.11.1"
-
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"

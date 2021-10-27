@@ -1,0 +1,28 @@
+{% set version = "0.1.0" %}
+
+package:
+  name: regridcart
+  version: {{ version }}
+
+source:
+  path: ..
+
+build:
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  build:
+    - python
+    - setuptools
+  run:
+    - python
+    - xarray
+    - netcdf4
+    - xesmf
+    - cartopy
+    - rioxarray
+
+test:
+  imports:
+    - regridcart
