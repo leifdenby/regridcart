@@ -27,25 +27,7 @@ def on_latlon_aligned_grid(da):
 
     return len(da.lat.shape) == 1 and len(da.lon.shape)
 
-
-def _find_xy_coords(da):
-    """
-    Using CF-conventions for grid projectino information look for the name of
-    the x- and y-coordinates in the DataArray
-    """
-
-    def find_coord(standard_name):
-        for c in da.coords:
-            if da[c].attrs.get("standard_name") == standard_name:
-                return c
-        raise Exception(f"coordinate with standard_name `{standard_name}` not found")
-
-    x_coord = find_coord("projection_x_coordinate")
-    y_coord = find_coord("projection_y_coordinate")
-    return x_coord, y_coord
-
-
-def get_latlon_coords_using_crs(da):
+def parse_crs(da):
     """
     Get the lat/lon coordinate positions using projection information stored in
     a xarray.DataArray
@@ -55,7 +37,6 @@ def get_latlon_coords_using_crs(da):
     crs = None
     try:
         crs = parse_cf(da)
-        x_coord, y_coord = _find_xy_coords(da=da)
     except NoProjectionInformationFound:
         pass
 
@@ -66,12 +47,23 @@ def get_latlon_coords_using_crs(da):
         # rio returns its own projection class type, let's turn it into a
         # cartopy projection
         crs = ccrs.Projection(crs_rio)
-        x_coord, y_coord = "x", "y"
 
     # third, we look for a user-defined attribute
     if crs is None and "crs" in da.attrs:
         crs = da.attrs["crs"]
-        x_coord, y_coord = _find_xy_coords(da=da)
+
+    return crs
+
+
+def get_latlon_coords_using_crs(da):
+    """
+    Get the lat/lon coordinate positions using projection information stored in
+    a xarray.DataArray
+    """
+    crs = parse_crs(da)
+    # assume that the spatial coordinates are given by the first two dimensions
+    # for now
+    x_coord, y_coord, *_ = da.dims
 
     if crs is None:
         raise NoProjectionInformationFound
