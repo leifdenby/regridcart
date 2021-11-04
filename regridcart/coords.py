@@ -27,6 +27,7 @@ def on_latlon_aligned_grid(da):
 
     return len(da.lat.shape) == 1 and len(da.lon.shape)
 
+
 def parse_crs(da):
     """
     Get the lat/lon coordinate positions using projection information stored in
