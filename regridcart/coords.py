@@ -56,15 +56,12 @@ def parse_crs(da):
     return crs
 
 
-def get_latlon_coords_using_crs(da):
+def get_latlon_coords_using_crs(da, x_coord="x", y_coord="y"):
     """
     Get the lat/lon coordinate positions using projection information stored in
     a xarray.DataArray
     """
     crs = parse_crs(da)
-    # assume that the spatial coordinates are given by the first two dimensions
-    # for now
-    x_coord, y_coord, *_ = da.dims
 
     if crs is None:
         raise NoProjectionInformationFound
