@@ -26,11 +26,11 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest black
+        python -m pip install flake8 pytest black
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Check formatting with black
       run: |
-        pip install black==21.9b0
+        python -m pip install black==21.9b0
         # check that formatting is ok with black
         black --check .
     - name: Lint with flake8
@@ -49,9 +49,9 @@ jobs:
       run: conda install -y cartopy xesmf xarray rioxarray -c conda-forge
     - name: Test package with pytest
       run: |
-        pip install pytest worldview_dl
+        python -m pip install pytest worldview_dl
         python -m pytest
     - name: Test notebooks
       run: |
-        pip install nbval nb-black
+        python -m pip install nbval nb-black
         python -m pytest --nbval-lax --current-env
