@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8]
+        python-version: [3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -23,22 +23,6 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install flake8 pytest black
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Check formatting with black
-      run: |
-        python -m pip install black==21.9b0
-        # check that formatting is ok with black
-        black --check .
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: setup-conda
       uses: s-weigand/setup-conda@v1.0.7
       with:
@@ -47,11 +31,20 @@ jobs:
           conda-channels: anaconda, conda-forge
     - name: Install dependencies (conda)
       run: conda install -y cartopy xesmf xarray rioxarray -c conda-forge
-    - name: Test package with pytest
+    - name: Install dependencies
       run: |
-        python -m pip install pytest worldview_dl
-        python -m pytest
-    - name: Test notebooks
+        python -m pip install --upgrade pip
+        python -m pip install .[dev]
+    - name: Check formatting with black
       run: |
-        python -m pip install nbval nb-black
+        # check that formatting is ok with black
+        black --check .
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Test package with pytest (including notebooks)
+      run: |
         python -m pytest --nbval-lax --current-env
