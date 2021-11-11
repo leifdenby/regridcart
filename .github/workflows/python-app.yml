@@ -31,13 +31,8 @@ jobs:
     - name: install mamba
       uses: mamba-org/provision-with-micromamba@main
       with:
-        channels: conda-forge
         extra-specs: |
           python=${{ matrix.python-version }}
-          cartopy
-          xesmf
-          xarray
-          rioxarray
 
     - name: Install dependencies
       run: |
