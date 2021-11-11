@@ -62,9 +62,11 @@ def _latlon_box_adjust_sigfigs(bbox, decimals=2):
     """
     # bbox: [W, E, S, N]
     fns = [np.floor, np.ceil, np.floor, np.ceil]
-    scaling = 10**decimals
+    scaling = 10 ** decimals
+
     def _af(fn):
         return lambda v: fn(v * scaling) / scaling
+
     bbox_truncated = np.array([_af(fn)(v) for (fn, v) in zip(fns, bbox)])
     return bbox_truncated
 
@@ -86,10 +88,10 @@ def _crop_with_latlon_aligned_crid(domain, da, pad_pct):
     y_range = [y_min, y_max]
 
     bounds_checks = [
-     ("W", x_min, da[x_dim].min().data),
-     ("E", da[x_dim].max().data, x_max),
-     ("S", y_min, da[y_dim].min().data),
-     ("N", da[y_dim].max().data,  y_max)
+        ("W", x_min, da[x_dim].min().data),
+        ("E", da[x_dim].max().data, x_max),
+        ("S", y_min, da[y_dim].min().data),
+        ("N", da[y_dim].max().data, y_max),
     ]
 
     for edge, v1, v2 in bounds_checks:
