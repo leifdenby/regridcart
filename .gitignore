@@ -4,3 +4,4 @@ __pycache__/
 *_LogFile
 *.egg-info/
 build/
+dist/

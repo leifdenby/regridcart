@@ -61,4 +61,6 @@ def resample(da, old_grid, new_grid, method, keep_attrs):
     # must be first
     da_resampled = da_resampled.transpose(..., "y", "x")
 
+    regridder.clean_weight_file()
+
     return da_resampled
