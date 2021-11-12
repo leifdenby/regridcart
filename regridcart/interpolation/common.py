@@ -49,6 +49,9 @@ def resample(
     old_grid = None
     new_grid = domain.get_grid(dx=dx)
 
+    if apply_crop:
+        da = crop_field_to_domain(domain=domain, da=da)
+
     if has_latlon_coords(da):
         coords = {}
         coords["lat"] = da.coords["lat"]
@@ -64,9 +67,6 @@ def resample(
 
     if old_grid is None:
         raise NotImplementedError(da.coords)
-
-    if apply_crop:
-        da = crop_field_to_domain(domain=domain, da=da)
 
     da_resampled = resample_common(
         da=da,

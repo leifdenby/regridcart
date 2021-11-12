@@ -54,20 +54,26 @@ def _has_spatial_coord(da, c):
     return c in da and da[c].attrs.get("units") == "m"
 
 
-def _latlon_box_to_integer_values(bbox):
+def _latlon_box_adjust_sigfigs(bbox, decimals=2):
     """
-    Round bounding-box lat/lon values to nearest integer values in direction
-    that ensure that original area is contained with the new bounding box
+    Round bounding-box lat/lon values to nearest number of significant figures
+    in direction that ensure that original area is contained with the new
+    bounding box
     """
     # bbox: [W, E, S, N]
     fns = [np.floor, np.ceil, np.floor, np.ceil]
-    bbox_truncated = np.array([fn(v) for (fn, v) in zip(fns, bbox)])
+    scaling = 10 ** decimals
+
+    def _af(fn):
+        return lambda v: fn(v * scaling) / scaling
+
+    bbox_truncated = np.array([_af(fn)(v) for (fn, v) in zip(fns, bbox)])
     return bbox_truncated
 
 
 def _crop_with_latlon_aligned_crid(domain, da, pad_pct):
     x_dim, y_dim = "lon", "lat"
-    latlon_box = _latlon_box_to_integer_values(domain.latlon_bounds)
+    latlon_box = _latlon_box_adjust_sigfigs(domain.latlon_bounds)
     xs = latlon_box[..., 0]
     ys = latlon_box[..., 1]
     x_min, x_max = np.min(xs), np.max(xs)
@@ -80,6 +86,17 @@ def _crop_with_latlon_aligned_crid(domain, da, pad_pct):
             raise NotImplementedError
     x_range = [x_min, x_max]
     y_range = [y_min, y_max]
+
+    bounds_checks = [
+        ("W", x_min, da[x_dim].min().data),
+        ("E", da[x_dim].max().data, x_max),
+        ("S", y_min, da[y_dim].min().data),
+        ("N", da[y_dim].max().data, y_max),
+    ]
+
+    for edge, v1, v2 in bounds_checks:
+        if v1 < v2:
+            raise DomainBoundsOutsideOfInputException(f"{edge}: {v1} < {v2}")
 
     return crop_field_to_bbox(
         da=da,
@@ -96,7 +113,7 @@ def _crop_with_latlon_aux_grid(domain, da, da_lat, da_lon, pad_pct):
     assert len(da_lat.dims) == 2
     y_dim, x_dim = da_lat.dims
 
-    latlon_box = _latlon_box_to_integer_values(domain.latlon_bounds)
+    latlon_box = _latlon_box_adjust_sigfigs(domain.latlon_bounds)
     bbox_lons = latlon_box[..., 0]
     bbox_lats = latlon_box[..., 1]
 
