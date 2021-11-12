@@ -41,7 +41,7 @@ def test_latlon_aligned_data():
 
     da_phi = ds.phi
     da_phi_cropped = rc.crop_field_to_domain(
-        domain=target_domain, da=da_phi, pad_pct=0.0
+        domain=target_domain, da=da_phi
     )
 
     dx = 50.0e3  # [m]
