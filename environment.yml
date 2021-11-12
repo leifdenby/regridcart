@@ -1,0 +1,8 @@
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - cartopy
+  - xesmf
+  - xarray
+  - rioxarray

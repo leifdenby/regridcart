@@ -121,12 +121,27 @@ class CartesianDomain:
         # TODO: might want to check for some cartesian coordinates here
         pass
 
+    _str_print = ["x_c", "y_c", "l_zonal", "l_meridional"]
+
+    def __str__(self):
+        attrs = ", ".join(f"{s}={getattr(self, s):g}" for s in self._str_print)
+        return f"{self.__class__.__name__}({attrs})"
+
 
 class LocalCartesianDomain(CartesianDomain):
     """
     Domain representing the tangent plane projection centered at specific
     latitude and longitude
     """
+
+    _str_print = [
+        "x_c",
+        "y_c",
+        "l_zonal",
+        "l_meridional",
+        "central_latitude",
+        "central_longitude",
+    ]
 
     def __init__(
         self,
@@ -153,13 +168,25 @@ class LocalCartesianDomain(CartesianDomain):
         """
         corners = self.spatial_bounds
         latlon_pts = ccrs.PlateCarree().transform_points(
-            x=corners[..., 0],
-            y=corners[..., 1],
+            x=corners[..., 0] - self.x_c,
+            y=corners[..., 1] - self.y_c,
             src_crs=self.crs,
             z=np.zeros_like(corners[..., 0]),
         )
 
         return latlon_pts
+
+    def latlon_from_xy(self, x, y):
+        """
+        Calculate the latlon coordinates from xy-coordinates in the domain
+        """
+        x = np.atleast_1d(x)
+        y = np.atleast_1d(y)
+        latlon_pts = ccrs.PlateCarree().transform_points(
+            x=x, y=y, src_crs=self.crs, z=np.zeros_like(x)
+        )
+
+        return latlon_pts[..., 0], latlon_pts[..., 1]
 
     def get_grid(self, dx):
         """
@@ -177,18 +204,16 @@ class LocalCartesianDomain(CartesianDomain):
             ds_grid[c].attrs.update(ds_grid_cart[c].attrs)
 
         x, y = np.meshgrid(ds_grid.x, ds_grid.y, indexing="ij")
-        latlon_pts = ccrs.PlateCarree().transform_points(
-            x=x, y=y, src_crs=self.crs, z=np.zeros_like(x)
-        )
+        lons, lats = self.latlon_from_xy(x=x, y=y)
 
         ds_grid["lon"] = xr.DataArray(
-            latlon_pts[..., 0],
+            lons,
             dims=("x", "y"),
             coords=dict(x=ds_grid.x, y=ds_grid.y),
             attrs=dict(standard_name="grid_longitude", units="degree"),
         )
         ds_grid["lat"] = xr.DataArray(
-            latlon_pts[..., 1],
+            lats,
             dims=("x", "y"),
             coords=dict(x=ds_grid.x, y=ds_grid.y),
             attrs=dict(standard_name="grid_latitude", units="degree"),
@@ -262,30 +287,6 @@ class LocalCartesianDomain(CartesianDomain):
                 f"`{', '.join(missing_coords)}` which are required to make the "
                 f" dataset valid for a{self.__class__.__name__} domain"
             )
-
-
-class LocalCartesianSquareTileDomain(LocalCartesianDomain):
-    def __init__(self, central_latitude, central_longitude, size, x_c=0.0, y_c=0.0):
-        """
-        Create a locally Cartesian square tile with `size` (in meters)
-        """
-        self.size = size
-        super().__init__(
-            central_latitude=central_latitude,
-            central_longitude=central_longitude,
-            l_meridional=size,
-            l_zonal=size,
-            x_c=x_c,
-            y_c=y_c,
-        )
-
-    def get_grid(self, N):
-        dx = self.size / N
-        ds_grid = super().get_grid(dx=dx)
-        # the floating point devision in `get_grid` when we're passing in `dx`
-        # means that sometimes we might produce an extra set of x- or y-values,
-        # so we do an index-selection here to ensure those aren't included
-        return ds_grid.isel(x=slice(0, N), y=slice(0, N))
 
 
 def deserialise_domain(data):

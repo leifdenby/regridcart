@@ -40,9 +40,7 @@ def test_latlon_aligned_data():
     ds["phi"] = np.sin(ds.lat) * np.cos(ds.lon)
 
     da_phi = ds.phi
-    da_phi_cropped = rc.crop_field_to_domain(
-        domain=target_domain, da=da_phi, pad_pct=0.0
-    )
+    da_phi_cropped = rc.crop_field_to_domain(domain=target_domain, da=da_phi)
 
     dx = 50.0e3  # [m]
     da_phi_resampled = rc.resample(target_domain, da=da_phi_cropped, dx=dx)
