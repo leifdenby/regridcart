@@ -16,8 +16,10 @@ def crop_field_to_bbox(da, x_range, y_range, pad_pct=0.1, x_dim="x", y_dim="y"):
             f"The coordinates selected for cropping (`{x_dim}` and `{y_dim}`)"
             f" are not present in the provided DataArray ({', '.join(da.coords.keys())})"
         )
-    x_min, x_max = x_range
-    y_min, y_max = y_range
+    # cast to float in case the ranges are given as ints, otherwise the `-=`
+    # and `+=` operations below will fail
+    x_min, x_max = np.array(x_range).astype(float)
+    y_min, y_max = np.array(y_range).astype(float)
 
     lx = x_max - x_min
     ly = y_max - y_min
