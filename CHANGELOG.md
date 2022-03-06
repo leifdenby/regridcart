@@ -1,9 +1,9 @@
 # Changelog
 
 
-## [Unreleased](https://github.com/leifdenby/regridcart/tree/HEAD)
+## [v0.1.1](https://github.com/leifdenby/regridcart/tree/v0.1.1)
 
-[Full Changelog](https://github.com/leifdenby/regridcart/compare/v0.1.0...)
+[Full Changelog](https://github.com/leifdenby/regridcart/compare/v0.1.0...v0.1.1)
 
 *enhancements*
 
