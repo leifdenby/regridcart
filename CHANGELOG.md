@@ -21,6 +21,11 @@
 - Add support for coordinates where lat/lon positions are given in integers
   rather than floats [\#12](https://github.com/leifdenby/regridcart/pull/12)
 
+*maintenance*
+
+- add ci action to automatically publish new releases on pypi
+  [\#17](https://github.com/leifdenby/regridcart/pull/17)
+
 
 ## [v0.1.0](https://github.com/leifdenby/regridcart/tree/v0.1.0)
 
