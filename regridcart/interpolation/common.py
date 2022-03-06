@@ -18,7 +18,7 @@ def _cartesian_resample(domain, da, dx):
 def resample(
     domain,
     da,
-    dx,
+    dx=None,
     method="bilinear",
     keep_attrs=False,
     backend="xesmf",
