@@ -1,6 +1,7 @@
+import logging
+
 import numpy as np
 import xarray as xr
-import logging
 
 from .mapping import CFProjection
 
