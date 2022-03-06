@@ -79,5 +79,8 @@ def test_latlon_aux_coord_data():
     )
 
     dx = 50.0e3  # [m]
+    Nx = np.round(target_domain.l_zonal / dx)
+    Ny = np.round(target_domain.l_meridional / dx)
     da_phi_resampled = rc.resample(target_domain, da=da_phi_cropped, dx=dx)
-    assert da_phi_resampled is not None
+    assert da_phi_resampled.x.count() == Nx
+    assert da_phi_resampled.y.count() == Ny

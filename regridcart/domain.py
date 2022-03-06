@@ -46,12 +46,15 @@ class CartesianDomain:
         """
         Get an xarray Dataset containing the discrete positions (in meters)
         """
+        # compute number of grid points first instead of using np.arange to
+        # avoid floating point stepping not always giving the same number of
+        # data points
+        Nx = np.round(self.l_zonal / dx)
+        Ny = np.round(self.l_meridional / dx)
         xmin = self.x_c - self.l_zonal / 2.0 + dx / 2.0
-        xmax = self.x_c + self.l_zonal / 2.0 + dx / 2.0
         ymin = self.y_c - self.l_meridional / 2.0 + dx / 2.0
-        ymax = self.y_c + self.l_meridional / 2.0 + dx / 2.0
-        x_ = np.arange(xmin, xmax, dx)
-        y_ = np.arange(ymin, ymax, dx)
+        x_ = xmin + dx * np.arange(Nx)
+        y_ = ymin + dx * np.arange(Ny)
 
         da_x = xr.DataArray(
             x_,
