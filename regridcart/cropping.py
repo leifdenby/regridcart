@@ -130,7 +130,7 @@ def _crop_with_latlon_aux_grid(domain, da, da_lat, da_lon, pad_pct):
             f"domain bounds (W, E), (S, N): ({da_lon.min().item()}, {da_lon.max().item()})"
             f", ({da_lat.min().item()}, {da_lat.max().item()}). "
             f"bbox bounds (W, E), (S, N): ({bbox_lons.min().item()}, {bbox_lons.max().item()})"
-            f", ({bbox_lats.min().item()}, {bbox_lats.max().item()})"
+            f", ({bbox_lats.min().item()}, {bbox_lats.max().item()})",
         )
 
     da_masked = da.where(mask, drop=True)
