@@ -7,6 +7,12 @@
 
 *bugfixes*
 
+- Because of float rounding issues when providing the grid-spacing as a float
+  the resulting grid sometimes had one fewer grid-points than expected. This
+  commit resolves this issue by rounding to the nearest integer when working
+  out how many grid-points to produce when regridding.
+  [\#16](https://github.com/leifdenby/regridcart/pull/16)
+
 - Add support for coordinates where lat/lon positions are given in integers
   rather than floats [\#12](https://github.com/leifdenby/regridcart/pull/12)
 
