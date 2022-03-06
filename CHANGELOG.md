@@ -5,6 +5,11 @@
 
 [Full Changelog](https://github.com/leifdenby/regridcart/compare/v0.1.0...)
 
+*enhancements*
+
+- Check to ensure that source data is inside region being cropped/regridded to.
+  [\#13](https://github.com/leifdenby/regridcart/pull/13)
+
 *bugfixes*
 
 - Because of float rounding issues when providing the grid-spacing as a float
