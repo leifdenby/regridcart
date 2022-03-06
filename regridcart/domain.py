@@ -1,14 +1,15 @@
 """
 Utilities to create (approximate) regular Cartesian gridded data from lat/lon satelite data
 """
-import cartopy.crs as ccrs
-import xarray as xr
-import numpy as np
-import matplotlib.pyplot as plt
 import itertools
-import matplotlib.patches as mpatches
-import shapely.geometry as geom
 import warnings
+
+import cartopy.crs as ccrs
+import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
+import numpy as np
+import shapely.geometry as geom
+import xarray as xr
 
 
 class CartesianDomain:

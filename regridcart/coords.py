@@ -10,7 +10,8 @@ import xarray as xr
 from .crs import NoProjectionInformationFound, parse_cf
 
 try:
-    import rioxarray  # ensures xr.DataArray.rio is available
+    # ensures xr.DataArray.rio is available
+    import rioxarray  # noqa
 
     HAS_RIO = True
 except ImportError:

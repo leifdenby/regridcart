@@ -1,6 +1,7 @@
 import numpy as np
-import regridcart as rc
 import xarray as xr
+
+import regridcart as rc
 from regridcart import __version__
 
 
