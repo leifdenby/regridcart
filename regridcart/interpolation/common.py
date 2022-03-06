@@ -5,8 +5,8 @@ from ..coords import (
     get_latlon_coords_using_crs,
     has_latlon_coords,
 )
-from .backends.common import resample as resample_common
 from ..cropping import crop_field_to_domain
+from .backends.common import resample as resample_common
 
 
 def _cartesian_resample(domain, da, dx):

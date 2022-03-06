@@ -1,12 +1,10 @@
 import numpy as np
-import cartopy.crs as ccrs
 
-from .crs import parse_cf as parse_cf_crs
 from .coords import (
+    NoProjectionInformationFound,
+    get_latlon_coords_using_crs,
     has_latlon_coords,
     on_latlon_aligned_grid,
-    get_latlon_coords_using_crs,
-    NoProjectionInformationFound,
 )
 
 

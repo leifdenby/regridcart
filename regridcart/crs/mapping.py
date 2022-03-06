@@ -6,8 +6,9 @@
 Currently this includes tools for working with CartoPy projections.
 
 """
-from .cbook import Registry
 import cartopy.crs as ccrs
+
+from .cbook import Registry
 
 
 class CFProjection:
