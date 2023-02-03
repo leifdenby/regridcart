@@ -1,5 +1,10 @@
 # Changelog
 
+## [unreleased](https://github.com/leifdenby/regridcart/tree/HEAD)
+
+- Handle change in xesmf=>0.6.3 (https://github.com/pangeo-data/xESMF/pull/175)
+  which prevents lat/lon grid information being copied to interpolated
+  DataArray. [\#8](https://github.com/leifdenby/regridcart/pull/18)
 
 ## [v0.1.1](https://github.com/leifdenby/regridcart/tree/v0.1.1)
 
